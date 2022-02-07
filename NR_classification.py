@@ -96,40 +96,40 @@ I will have to ensure that the model outputs an array of shape `[2]`.
 # image data, one-hot elem labels, energy
 im_dat, el_labs, en_labs = [],[],[]
 
-# for i in np.arange(130,131,5): # run over all energies
-#   C_dat = np.load('C_'+str(i)+'keV.npy')
+for i in np.arange(130,181,5): # run over all energies
+  C_dat = np.load('C_'+str(i)+'keV.npy')
   
-#   for n in range(np.shape(C_dat)[0]):
-#     im_dat.append(C_dat[n])
-#     el_labs.append([1,0])
-#     en_labs.append(i)
+  for n in range(np.shape(C_dat)[0]):
+    im_dat.append(C_dat[n])
+    el_labs.append([1,0])
+    en_labs.append(i)
     
-#   F_dat = np.load('F_'+str(i)+'keV.npy')
+  F_dat = np.load('F_'+str(i)+'keV.npy')
   
-#   for n in range(np.shape(F_dat)[0]):
-#     im_dat.append(F_dat[n])
-#     el_labs.append([0,1])
-#     en_labs.append(i)
+  for n in range(np.shape(F_dat)[0]):
+    im_dat.append(F_dat[n])
+    el_labs.append([0,1])
+    en_labs.append(i)
         
         
-C_dat = np.load('C_130keV.npy')
+# C_dat = np.load('C_130keV.npy')
 
-for n in range(np.shape(C_dat)[0]):
-  im_dat.append(C_dat[n])
-  el_labs.append([1,0])
-  en_labs.append(130)
+# for n in range(np.shape(C_dat)[0]):
+#   im_dat.append(C_dat[n])
+#   el_labs.append([1,0])
+#   en_labs.append(130)
   
-F_dat = np.load('F_170keV.npy')
+# F_dat = np.load('F_170keV.npy')
 
-for n in range(np.shape(F_dat)[0]):
-  im_dat.append(F_dat[n])
-  el_labs.append([0,1])
-  en_labs.append(170)
+# for n in range(np.shape(F_dat)[0]):
+#   im_dat.append(F_dat[n])
+#   el_labs.append([0,1])
+#   en_labs.append(170)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 X_train, X_test, y_train, y_test = train_test_split(im_dat, el_labs, 
-                                                    test_size=0.2, random_state=42)
+                                                    test_size=0.8, random_state=42)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Training squeezing #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -176,7 +176,7 @@ test_loader_iter = iter(test_loader)
 device = torch.device('cuda')
 
 
-model = Net.Net3().to(device)
+model = Net.Net3_mod().to(device)
 # optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.5) #stochastic gradient descent used as optimiser
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
@@ -189,7 +189,7 @@ numel_list = [p.numel() for p in model.parameters()]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-num_epochs = 20 #setting number of epochs for CNN
+num_epochs = 5 #setting number of epochs for CNN
 
 #running loop training and testing over previously specified number of epochs
 for epoch in range(1, num_epochs + 1):
