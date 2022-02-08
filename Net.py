@@ -83,14 +83,14 @@ class Net3(nn.Module):
       
       
 class Net3_mod(nn.Module):
-    def __init__(self):
+    def __init__(self,out_channels):
         super(Net3_mod, self).__init__()
 
         self.conv_layers = nn.Sequential( # 1x97x97
             nn.Conv2d(1, 16, kernel_size=2), # 16x96x96
             nn.LeakyReLU(),
             # nn.ReLU(),
-            # nn.Dropout(0.2),
+            nn.Dropout(0.05),
             nn.BatchNorm2d(16),
             nn.AvgPool2d(kernel_size=4), # 8x24x24
             # nn.MaxPool2d(kernel_size=(2,2)),
@@ -98,7 +98,7 @@ class Net3_mod(nn.Module):
             nn.Conv2d(16, 128, kernel_size=5,padding=2), # 128x24x24
             nn.LeakyReLU(),
             # nn.ReLU(),
-            # nn.Dropout(0.2),
+            nn.Dropout(0.05),
             nn.BatchNorm2d(128),
             nn.AvgPool2d(kernel_size=4), # 64x6x6
             # nn.MaxPool2d(kernel_size=(2,2)),
@@ -106,7 +106,7 @@ class Net3_mod(nn.Module):
             nn.Conv2d(128, 1024, kernel_size=5,padding=2), # 1024x6x6
             nn.LeakyReLU(),
             # nn.ReLU(),
-            # nn.Dropout(0.2),
+            nn.Dropout(0.05),
             nn.BatchNorm2d(1024),
             nn.AvgPool2d(kernel_size=2), # 1024x3x3
             # nn.MaxPool2d(kernel_size=(2,2)),
@@ -132,7 +132,7 @@ class Net3_mod(nn.Module):
             # nn.Linear(576,144),
             # nn.ReLU(),
             nn.LeakyReLU(),
-            nn.Linear(256,20),
+            nn.Linear(256,out_channels),
             # nn.Softmax(dim=1),
             nn.Sigmoid(),
         )

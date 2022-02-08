@@ -156,12 +156,16 @@ I will have to ensure that the model outputs an array of shape `[2]`.
 # im_dat, el_labs, en_labs = [],[],[]
 im_dat, el_labs = [],[]
 
-energies = np.arange(150,196,5)
+energies = np.arange(50,196,5)
 
 for i in range(len(energies)): # run over all energies
   E = energies[i]
 
-  C_dat = np.load('C_'+str(E)+'keV.npy')
+  C_dat = np.load('data/C_'+str(E)+'keV.npy')[:1800,:,:]
+  # Can scale by mean and std:
+  C_dat = (C_dat-np.nanmean(C_dat,axis=0))/np.nanstd(C_dat,axis=0)
+  # C_dat = (C_dat-np.nanmean(C_dat,axis=(1,2)).reshape(-1,1,1))/np.nanstd(C_dat,axis=(1,2)).reshape(-1,1,1)
+  C_dat[C_dat!=C_dat] = 0
   
   for n in range(np.shape(C_dat)[0]):
     im_dat.append(C_dat[n])
@@ -170,7 +174,10 @@ for i in range(len(energies)): # run over all energies
     
     # en_labs.append(i)
     
-  F_dat = np.load('F_'+str(E)+'keV.npy')
+  F_dat = np.load('data/F_'+str(E)+'keV.npy')[:1800,:,:]
+  F_dat = (F_dat-np.nanmean(F_dat,axis=0))/np.nanstd(F_dat,axis=0)
+  # F_dat = (F_dat-np.nanmean(F_dat,axis=(1,2)).reshape(-1,1,1))/np.nanstd(F_dat,axis=(1,2)).reshape(-1,1,1)
+  F_dat[F_dat!=F_dat] = 0
   
   for n in range(np.shape(F_dat)[0]):
     im_dat.append(F_dat[n])
@@ -247,7 +254,7 @@ test_loader_iter = iter(test_loader)
 device = torch.device('cuda')
 
 
-model = Net.Net3_mod().to(device)
+model = Net.Net3_mod(2*len(energies)).to(device)
 # optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.5) #stochastic gradient descent used as optimiser
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
@@ -272,10 +279,10 @@ for epoch in range(1, num_epochs + 1):
 #%%
 
 
-plt.figure(figsize=(12,10))
-i = 37
-E_spec_labels = [f"C {i} keV" for i in range(150,196,5)]+[f"F{i} keV" for i in range(150,196,5)]
-E_labels = np.array(list(range(150,196,5)) + list(range(150,196,5)))
+plt.figure(figsize=(22,10))
+i = 4
+E_spec_labels = [f"C {i} keV" for i in energies]+[f"F{i} keV" for i in energies]
+E_labels = np.array(list(energies) + list(energies))
 plt.bar(
   E_spec_labels,
   pred[-1][i],
@@ -284,14 +291,14 @@ plt.bar(
 )
 plt.xticks(rotation="vertical")
 plt.ylabel("Weight")
-tot_prob = np.sum(pred[-1][i])
-C_prob = np.sum(pred[-1][i,:10])
-F_prob = np.sum(pred[-1][i,10:])
-C_E = np.sum(np.arange(10)*pred[-1][i,:10]/C_prob)
-F_E = np.sum(np.arange(10,20)*pred[-1][i,10:]/F_prob)
+tot_prob = np.nansum(pred[-1][i])
+C_prob = np.nansum(pred[-1][i,:int(len(energies))])
+F_prob = np.nansum(pred[-1][i,int(len(energies)):])
+C_E = np.nansum(np.arange(int(len(energies)))*pred[-1][i,:int(len(energies))]/C_prob)
+F_E = np.nansum(np.arange(int(len(energies)),2*int(len(energies)))*pred[-1][i,int(len(energies)):]/F_prob)
 pred_elem = "C" if C_prob > F_prob else "F"
 pred_E = C_E if C_prob > F_prob else F_E
-act_elem  = "C" if act[-1][i] < 10 else "F"
+act_elem  = "C" if act[-1][i] < int(len(energies)) else "F"
 
 final_energy = np.round(E_labels[int(pred_E)] + 5 * (pred_E % int(pred_E)),1)
 
