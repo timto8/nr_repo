@@ -87,49 +87,59 @@ class Net3_mod(nn.Module):
         super(Net3_mod, self).__init__()
 
         self.conv_layers = nn.Sequential( # 1x97x97
-            nn.Conv2d(1, 8, kernel_size=2), # 8x96x96
+            nn.Conv2d(1, 16, kernel_size=2), # 16x96x96
             nn.LeakyReLU(),
             # nn.ReLU(),
             # nn.Dropout(0.2),
-            nn.BatchNorm2d(8),
+            nn.BatchNorm2d(16),
             nn.AvgPool2d(kernel_size=4), # 8x24x24
             # nn.MaxPool2d(kernel_size=(2,2)),
             
-            nn.Conv2d(8, 64, kernel_size=3,padding=1), # 64x24x24
+            nn.Conv2d(16, 128, kernel_size=5,padding=2), # 128x24x24
             nn.LeakyReLU(),
             # nn.ReLU(),
             # nn.Dropout(0.2),
-            nn.BatchNorm2d(64),
-            nn.AvgPool2d(kernel_size=4), # 10x6x6
+            nn.BatchNorm2d(128),
+            nn.AvgPool2d(kernel_size=4), # 64x6x6
             # nn.MaxPool2d(kernel_size=(2,2)),
             
-            nn.Conv2d(64, 256, kernel_size=3,padding=1), # 256x6x6
+            nn.Conv2d(128, 1024, kernel_size=5,padding=2), # 1024x6x6
             nn.LeakyReLU(),
             # nn.ReLU(),
             # nn.Dropout(0.2),
-            nn.BatchNorm2d(256),
-            nn.AvgPool2d(kernel_size=2), # 256x3x3
+            nn.BatchNorm2d(1024),
+            nn.AvgPool2d(kernel_size=2), # 1024x3x3
             # nn.MaxPool2d(kernel_size=(2,2)),
+            
+            # nn.Conv2d(1024, 2048, kernel_size=5,padding=2), # 2048x6x6
+            # nn.LeakyReLU(),
+            # # nn.ReLU(),
+            # # nn.Dropout(0.2),
+            # nn.BatchNorm2d(2048),
+            # nn.AvgPool2d(kernel_size=2), # 2048x3x3
+            # # nn.MaxPool2d(kernel_size=(2,2)),
+            
+            
         )
             
         self.fc_layers = nn.Sequential(
-            nn.Linear(2304,288),
+            nn.Linear(9216,1152),
             # nn.ReLU(),
             nn.LeakyReLU(),
-            nn.Linear(288,72),
+            nn.Linear(1152,256),
             # nn.ReLU(),
             # nn.LeakyReLU(),
-            # nn.Linear(300,80),
+            # nn.Linear(576,144),
             # nn.ReLU(),
             nn.LeakyReLU(),
-            nn.Linear(72,2),
+            nn.Linear(256,20),
             # nn.Softmax(dim=1),
             nn.Sigmoid(),
         )
 
     def forward(self, x):
         x = self.conv_layers(x)
-        x = x.view(-1, 2304) #flattens as described below
+        x = x.view(-1, 9216) #flattens as described below
 #         x = x.view(x.size(0), -1)
         x = self.fc_layers(x)
         return x
